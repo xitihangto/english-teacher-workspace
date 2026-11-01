@@ -22,8 +22,11 @@ def check(path, kind=None):
 
     # ---- 1) 字体四槽（三套体系通用）----
     fonts = re.findall(r'<w:rFonts[^>]*>', xml)
+    # 只查"有没有显式设"，不限制字体名：
+    # 讲义允许最大标题用黑体，正文用宋体，两者都是合规的。
+    # 真正要防的是靠主题继承（缺 w:eastAsia / w:hint）。
     bad = [m for m in fonts
-           if 'w:eastAsia="宋体"' not in m or 'w:hint="eastAsia"' not in m]
+           if 'w:eastAsia="' not in m or 'w:hint="eastAsia"' not in m]
 
     # 判断字体是否主要靠主题继承（模板就是这种）
     theme_based = False
