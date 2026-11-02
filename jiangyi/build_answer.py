@@ -6,8 +6,8 @@ from docx.shared import Pt, Emu
 from docx.oxml.ns import qn
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, '交大附中2026-2027学年高三上第一次调研测试英语（备课讲义版）.docx')
-OUT = os.path.join(ROOT, '交大附中2026-2027学年高三上第一次调研测试英语（答案版）.docx')
+SRC = os.path.join(ROOT, '生成物', '交大附中2026-2027学年高三上第一次调研测试英语（备课讲义版）.docx')
+OUT = os.path.join(ROOT, '生成物', '交大附中2026-2027学年高三上第一次调研测试英语（答案版）.docx')
 
 src = Document(SRC)
 out = Document()

@@ -505,6 +505,6 @@ p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 p = para(doc, 'Li Hua')
 p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
-out = '/Users/linquin/WorkBuddy AI/EnglishTeacher-Workspace/交大附中2026-2027学年高三上第一次调研测试英语试卷（识别版）.docx'
+out = '/Users/linquin/WorkBuddy AI/EnglishTeacher-Workspace/生成物/交大附中2026-2027学年高三上第一次调研测试英语试卷（识别版）.docx'
 doc.save(out)
 print('saved:', out)

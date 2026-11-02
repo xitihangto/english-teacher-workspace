@@ -44,6 +44,6 @@ ns = {
 }
 exec(compile(content, 'practice_content', 'exec'), ns)
 
-out = os.path.join(ROOT, '交大附中2026-2027学年高三上第一次调研测试英语（练习版）.docx')
+out = os.path.join(ROOT, '生成物', '交大附中2026-2027学年高三上第一次调研测试英语（练习版）.docx')
 doc.save(out)
 print('saved:', out)

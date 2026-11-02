@@ -564,6 +564,6 @@ b.green('1. 审题立意与行文结构：书信体，三段式。首段“共�
 b.green('2. 高分地道词汇与短语：• without asking for your permission（未经你同意）• out of carelessness instead of bad intentions（出于疏忽而非恶意，instead of 对比结构很地道）• label your food with your name（在食物上贴名字标签）• respect your belongings（尊重你的物品）• solve the conflict properly（妥善解决冲突）• rely on mutual respect（依靠相互尊重）')
 b.green('3. 句式多样性：① 首段用 so 引导的并列句承接因果（It must be really annoying, so I’m writing to…）；② 中段用 if 引导的条件状语从句两次（If you calmly tell him… / If he still ignores your words…），构成“先礼后兵”的双层假设；③ 用 rather than / instead of 的对比结构替代简单的 but；④ 建议句使用 I suggest you (should) do 的虚拟语气，语气委婉而得体。')
 
-out = '/Users/linquin/WorkBuddy AI/EnglishTeacher-Workspace/交大附中2026-2027学年高三上第一次调研测试英语（备课讲义版）.docx'
+out = '/Users/linquin/WorkBuddy AI/EnglishTeacher-Workspace/生成物/交大附中2026-2027学年高三上第一次调研测试英语（备课讲义版）.docx'
 b.save(out)
 print('saved:', out)
