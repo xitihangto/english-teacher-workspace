@@ -122,6 +122,7 @@
 
 | 时间 | 改了什么 | 涉及文件 |
 |---|---|---|
+| 2026-11-04 20:22 | **Release 验证归用户，agent 不盯 CI**（用户原话「release 我自己去验证，你只要代码对就行，别浪费时间轮询等待」）。`变更日志.md` §0.3.2 新增「推完就收工，不盯 CI」表：不 `gh run watch` / 不轮询 / 不 sleep / 不为试 CI 推测试 tag；agent 责任止于代码对（YAML 可解析、脚本本地跑通、分支演练过）。`AGENTS.md` 第 4 条同步 | `变更日志.md` §0.3.2、`AGENTS.md` 第 4 条 |
 | 2026-11-04 20:20 | **Release 改由 CI 自动建**（用户原话「以后每次发新版，顺便 ci 一次 release」）。新增 `.github/workflows/release.yml`：tag 推上去自动跑，从 `变更日志.md` 对应版本条目生成 Release 说明，已存在则更新不重复建；新增 `工具/release_notes.py`；`变更日志.md` §0.3.2 补「第 5 件是自动的」与失败处理表。**升版时不再手动 `gh release create`** | `.github/workflows/release.yml`、`工具/release_notes.py`、`变更日志.md` §0.3.2 |
 | 2026-11-04 20:10 | **首次建 Release**：v1.15 已发 Release，源码 zip 匿名可下（306 KB / 34 文件，无成品原料）。下载链路 `github.com/.../archive/...` 会 302 到 `codeload.github.com`，套 CF 反代时两个域名都要覆盖 | 远端 Release `v1.15` |
 
