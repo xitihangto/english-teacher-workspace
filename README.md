@@ -79,13 +79,13 @@
 
 ## 版本
 
-当前 `v1.15`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
+当前 `v1.16`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
 
 每个版本对应一个 GitHub Release，源码 zip 不需要登录就能下：
 
 ```bash
 # 固定版本
-curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.15.zip
+curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.16.zip
 # 永远最新
 curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/heads/main.zip
 ```
