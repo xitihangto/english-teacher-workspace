@@ -1,0 +1,81 @@
+name: Release
+
+# 每次打 tag 推送，自动建一个 GitHub Release（源码 zip 由 GitHub 自动附上）。
+# 说明正文从 变更日志.md 对应版本条目生成，不需要另写一遍。
+# 手动重跑：Actions → Release → Run workflow，填 tag。
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要重跑 release 的 tag（如 v1.15）'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出（要完整历史，否则 tag 上取不到 变更日志.md）
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 确定版本号
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "版本号：$TAG"
+
+      - name: 从 变更日志.md 生成说明
+        id: notes
+        run: |
+          TAG="${{ steps.v.outputs.tag }}"
+          if python3 工具/release_notes.py "$TAG" > /tmp/notes.md 2>/tmp/err.txt; then
+            TITLE="$(python3 工具/release_notes.py "$TAG" --title)"
+            echo "fallback=0" >> "$GITHUB_OUTPUT"
+            echo "正文 $(wc -l < /tmp/notes.md) 行"
+          else
+            # 兜底：变更日志里没这条也照样发 Release，说明用 GitHub 自动生成的
+            TITLE="$TAG"
+            echo "fallback=1" >> "$GITHUB_OUTPUT"
+            echo "::warning::$(cat /tmp/err.txt) —— 改用 GitHub 自动生成说明"
+          fi
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "标题：$TITLE"
+
+      - name: 建或更新 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
+          TITLE: ${{ steps.notes.outputs.title }}
+          FALLBACK: ${{ steps.notes.outputs.fallback }}
+        run: |
+          if [ "$FALLBACK" = "1" ]; then
+            ARGS=(--generate-notes)
+          else
+            ARGS=(--notes-file /tmp/notes.md)
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG 已存在 → 更新说明"
+            gh release edit "$TAG" --title "$TITLE" "${ARGS[@]}"
+          else
+            echo "release $TAG 不存在 → 新建"
+            gh release create "$TAG" --title "$TITLE" "${ARGS[@]}" --verify-tag
+          fi
+          echo "完成：$(gh release view "$TAG" --json url --jq .url)"
