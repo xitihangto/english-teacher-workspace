@@ -47,13 +47,21 @@ jobs:
           TAG="${{ steps.v.outputs.tag }}"
           if python3 工具/release_notes.py "$TAG" > /tmp/notes.md 2>/tmp/err.txt; then
             TITLE="$(python3 工具/release_notes.py "$TAG" --title)"
-            echo "fallback=0" >> "$GITHUB_OUTPUT"
             echo "正文 $(wc -l < /tmp/notes.md) 行"
           else
-            # 兜底：变更日志里没这条也照样发 Release，说明用 GitHub 自动生成的
+            # 兜底：变更日志里没这条也照样发 Release，别让下载入口断掉
             TITLE="$TAG"
-            echo "fallback=1" >> "$GITHUB_OUTPUT"
-            echo "::warning::$(cat /tmp/err.txt) —— 改用 GitHub 自动生成说明"
+            {
+              echo "## $TAG"
+              echo
+              echo "> 本版说明没能在 \`变更日志.md\` 里找到对应条目（$(cat /tmp/err.txt)）。"
+              echo "> 具体改动见仓库 commit 历史。"
+              echo
+              echo "---"
+              echo
+              echo "**本包不含** \`生成物/\` 与 \`原料/\`（由 \`.gitignore\` 排除）。"
+            } > /tmp/notes.md
+            echo "::warning::$(cat /tmp/err.txt) —— 改用兜底说明"
           fi
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "标题：$TITLE"
@@ -63,19 +71,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.v.outputs.tag }}
           TITLE: ${{ steps.notes.outputs.title }}
-          FALLBACK: ${{ steps.notes.outputs.fallback }}
         run: |
-          if [ "$FALLBACK" = "1" ]; then
-            ARGS=(--generate-notes)
-          else
-            ARGS=(--notes-file /tmp/notes.md)
-          fi
-
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release $TAG 已存在 → 更新说明"
-            gh release edit "$TAG" --title "$TITLE" "${ARGS[@]}"
+            gh release edit "$TAG" --title "$TITLE" --notes-file /tmp/notes.md
           else
             echo "release $TAG 不存在 → 新建"
-            gh release create "$TAG" --title "$TITLE" "${ARGS[@]}" --verify-tag
+            gh release create "$TAG" --title "$TITLE" --notes-file /tmp/notes.md --verify-tag
           fi
           echo "完成：$(gh release view "$TAG" --json url --jq .url)"
