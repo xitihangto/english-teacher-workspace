@@ -8,3 +8,12 @@
 /原料/
 /build/wx-*/
 /build/*.txt
+
+# 一次性生成脚本：按某份卷写死、含整卷原文，不是通用能力，用完即废。
+# 通用渲染层 jiangyi/jy_builder.py、jiangyi/practice_style.py 仍入库。
+/build/*.py
+/jiangyi/build_*.py
+
+# Python 缓存
+__pycache__/
+*.pyc

@@ -74,18 +74,33 @@
 | `HANDOVER.md` | 完整交接：输入判定、硬约束、踩坑清单、交付校验 |
 | `技术要点.md` | 实现细节：字体四槽、表格模拟、自检脚本原理 |
 | `变更日志.md` | 变更控制规则 + 版本历史 |
+| `AGENTS.md` | **agent 入口，也是打包说明书**：打包 / 安装技能包的判据都在文末《两个自服务动作》 |
+
+---
+
+## 打包与安装技能包
+
+**不需要任何外部提示词文件**：判据写在 `AGENTS.md` 文末《两个自服务动作》。
+
+- **打包**：把仓库名（或链接）丢给任意 agent，说一句「打包成技能包」——甚至不用说，它读到 `AGENTS.md` 就知道。
+  它会现场探测 tag 与未提交改动，只装规则 / 模板 / 脚本 / 硬知识 / 硬规矩五类，产出 `生成物/技能包-<日期>/` 与同名 zip。
+- **安装**：把 zip 直接丢进对话，说「安装」——或者什么都不说也行，agent 认得出根目录的 `SKILL.md` + frontmatter，
+  会装到 `~/.workbuddy-ai/skills/<name>/` 并回一句触发词。
+
+包里必带「首次安装」一节（探测 python-docx / node / chromium，缺什么补什么），否则换台机器第一步就卡住。
+
 
 ---
 
 ## 版本
 
-当前 `v1.16`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
+当前 `v1.17`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
 
 每个版本对应一个 GitHub Release，源码 zip 不需要登录就能下：
 
 ```bash
 # 固定版本
-curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.16.zip
+curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.17.zip
 # 永远最新
 curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/heads/main.zip
 ```
