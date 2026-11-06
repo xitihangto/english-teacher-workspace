@@ -27,6 +27,9 @@
 **输入格式不限**：doc / docx / pdf / 各类图片 / 能读出文字的链接都接，单次最多 25 个，可混用。
 **用户发文件/图片/链接 + 一句话，直接产出 Word。不要问格式要求——规范已经写死在 `规范/` 里。**
 
+另有一条**附加工序**（不是第五条生产线）：PDF 合并 / 转图片 / 抽内嵌图 / Word 转 PDF，见 `规范/05`。
+它只换壳、不改内容，默认不装任何依赖，用到才装。
+
 ---
 
 ## 硬规则（违反会破坏机制）
@@ -63,6 +66,7 @@
     | 试卷识别 | `规范/03` | 01、02 |
     | 手写转录 | `规范/03-学生手写文章转录规则.md` | 01、02 |
     | 链接下载 | `规范/04`（无下载入口再转 03） | 01、02 |
+    | PDF 处理 | `规范/05` | 01–04 的排版规则 |
 
     别的体系里**没有本任务的补充规定**。找不到规定就按模板形式 + 常规做法处理，**不许去隔壁体系里找灵感**——那只是多一步、多烧 token，还会把两套配色和结构概念搅在一起。
 
@@ -70,6 +74,14 @@
     **不许截图 / 渲染成图核对**（Word 导 PDF、`qlmanage` 缩略图、LibreOffice 转图一律不做——macOS 上常因权限失败，重试是时间黑洞）；
     不许把成品逐段 dump 出来人工比对。一次任务自检**合计 ≤ 3 次**，到上限就交付，把不确定写进交付话术。
     自检只查「能不能打开、有没有明显坏」，**不查「内容对不对」**——内容靠生成时守规范，不靠事后看图验。详见 `规范/01` §0.1。
+
+12. **依赖默认不装，装也只进 `.venv`，大头不代劳**。判据一句话：
+    **pip 能装且小于 50 MB 的自动装（走国内镜像），需要外部安装包 / brew / sudo 的一律不装、只给指引。**
+    - 所有 Python 一律走 `./工具/py`，**不许裸敲 `python3`**（本机四个 python3，裸敲会装到别的解释器里）。
+    - 镜像顺序 清华 → 阿里 → 腾讯云，全失败才报错；**不许改全局 `pip.conf`**，只命令行带 `-i`。
+    - **不许 sudo、不许 `--break-system-packages`、不许 `brew install --cask`、不许下载 >50 MB 的文件**。
+    - Word 转 PDF 需要 LibreOffice：**只给国内镜像地址和「在 Word 里另存为 PDF」两条路，等用户自己装**，
+      不许静默降级成截图 / `qlmanage` 缩略图。详见 `规范/05` §2。
 
 判断一个文件属于哪类，只看一件事：**这个改动会不会让生成的 Word 长得不一样？**
 
@@ -122,7 +134,8 @@
 2. **只装五类**：
    - 规则：`规范/` 下全部 md；
    - 版式参照：`模板/01-标准模式讲义.docx`、`模板/02-标准模式批改.docx`、`示例/02-示例-批改稿.docx`；
-   - 可执行件：`工具/check.py`、`工具/strip_watermark.py`、`工具/xhs_grab.mjs`、`jiangyi/jy_builder.py`、`jiangyi/practice_style.py`；
+   - 可执行件：`工具/py`（依赖执行器，**必须带**）、`工具/check.py`、`工具/pdf_tools.py`、
+     `工具/strip_watermark.py`、`工具/xhs_grab.mjs`、`jiangyi/jy_builder.py`、`jiangyi/practice_style.py`；
    - 硬知识：`技术要点.md` 只裁三节（字体四槽 / Word XML 元素顺序 / 表格固定布局），其余不要；
    - 特殊指令：本文的硬规则 + `HANDOVER.md` 的目录约定 + 规则路由表，压成 SKILL.md 开头的「硬规矩」。
 3. **明确不带**：`变更日志.md`、`索引.md`、`README.md`、`HANDOVER.md` 的待办与版本史、`生成物/`、`原料/`、
@@ -152,30 +165,41 @@
 
 ## 环境依赖
 
-```bash
-# 必需
-python3 -c "import docx"     # python-docx
+**一切 Python 都走 `./工具/py`**（技能包里是 `./scripts/py`）：首次调用自建 `.venv`、用国内镜像装依赖，
+约 10 秒；之后直接转发。依赖坏了（解释器升级 / 目录被删）会自动重建，不需要人管。
 
+```bash
 # 成品体检
-python3 工具/check.py <成品.docx> --kind 01|02|03
+./工具/py 工具/check.py <成品.docx> --kind 01|02|03
 
 # 去水印（04 与所有下载/收到的文档都用它）
-python3 工具/strip_watermark.py 文件.docx          # 输出 文件-无水印.docx
-python3 工具/strip_watermark.py 文件.docx --inplace
+./工具/py 工具/strip_watermark.py 文件.docx          # 输出 文件-无水印.docx
+./工具/py 工具/strip_watermark.py 文件.docx --inplace
+
+# PDF：合并 / 转图 / 抽图 / Word 转 PDF（详见 规范/05）
+./工具/py 工具/pdf_tools.py info     <in.pdf>
+./工具/py 工具/pdf_tools.py merge    <out.pdf> <in1.pdf> <in2.pdf> ...
+./工具/py 工具/pdf_tools.py toimg    <in.pdf> <outdir> [--dpi 200] [--pages 1-3]
+./工具/py 工具/pdf_tools.py extract  <in.pdf> <outdir>
+./工具/py 工具/pdf_tools.py topdf    <in.docx> [--out out.pdf]   # 需 LibreOffice，不代装
 
 # 04 取小红书下载地址：需要 node（22+，自带 WebSocket）+ 一个 Chromium
 node 工具/xhs_grab.mjs "<预览页 URL>" 10000
 ```
 
-除 `python-docx` 外不需要任何第三方库。04 另需 node 与 chromium_headless_shell（路径见 `HANDOVER.md` §9），
+`.venv` 里只有两个包：`python-docx` 与 `pymupdf==1.24.14`（锁旧版是因为 2.x 会拖进 onnxruntime 等
+200 MB 依赖）。04 另需 node 与 chromium_headless_shell（路径见 `HANDOVER.md` §9），
 没有时退到系统 Chrome 的 `--headless --remote-debugging-port=9333`，CDP 协议一致，脚本不用改。
+
 
 ---
 
 ## 接手检查清单
 
 - [ ] 读完了 `索引.md` 和 `HANDOVER.md`
-- [ ] `python3 -c "import docx"` 通过
+- [ ] `./工具/py 工具/check.py --help` 能跑（首次会自建 `.venv`，约 10 秒）
+- [ ] 知道所有 Python 走 `./工具/py`，不裸敲 `python3`
+- [ ] 知道依赖默认不装、Word 转 PDF 的 LibreOffice 不代装（`规范/05` §2）
 - [ ] 知道三套体系的输入怎么判定（`HANDOVER.md` §2）
 - [ ] 知道链接里的附件走 04，不会回「打不开」
 - [ ] 知道默认去水印、页码要留

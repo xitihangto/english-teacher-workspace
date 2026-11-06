@@ -14,6 +14,9 @@
 | **试卷识别** | 试卷图片（多张，顺序可乱） | 转录排版后的 docx |
 | **链接文档下载** | 小红书等分享链接 | 原文件（默认已去水印） |
 
+另有**附加工序**：PDF 合并 / 转图片 / 抽内嵌图 / Word 转 PDF（`规范/05`）。只换壳、不改内容，
+**默认不装任何依赖**，用到才装；LibreOffice 那 806 MB 一律不代装，只给国内镜像地址。
+
 规范在 `规范/`，模板在 `模板/`，示例在 `示例/`。规范已经写死，用户发文件时不需要重复交代格式要求。
 
 最后一条是**前置工序**：从链接里把 Word 掏出来、顺手去水印，再交给前三套继续加工。
@@ -27,7 +30,7 @@
 
 判断标准只有一条：**这个改动会不会让生成的 Word 长得不一样？**
 
-- **会变** → 属于产物规则（`规范/` 五份 md、`模板/` 两份 docx、`示例/`、`工具/strip_watermark.py`），
+- **会变** → 属于产物规则（`规范/` 六份 md、`模板/` 两份 docx、`示例/`、`工具/strip_watermark.py`），
   必须用户本人连续说出「修改规则」四个字才能改。agent 自己复述的**不算数**。
 - **不会变** → 属于说明文档（README、索引、HANDOVER、技术要点、check.py、xhs_grab.mjs、变更日志），
   直接改，不用口令，但要记日志。
@@ -63,6 +66,8 @@
 - **运行环境固定**：本机 macOS + 中文版 Word。不考虑 WPS、旧版 Word、Windows、跨平台。
 - **模板只作版式参照**，字体不能照抄——模板靠主题继承，`python-docx` 新建文档的默认主题是 Calibri。
 - 成品交付前跑 `工具/check.py` 体检。
+- **依赖一律走 `./工具/py`**（首次自建 `.venv`，走国内镜像，约 10 秒），不要裸敲 `python3`；
+  也不往系统 Python 里装东西，不用 sudo。
 
 ---
 
@@ -87,20 +92,21 @@
 - **安装**：把 zip 直接丢进对话，说「安装」——或者什么都不说也行，agent 认得出根目录的 `SKILL.md` + frontmatter，
   会装到 `~/.workbuddy-ai/skills/<name>/` 并回一句触发词。
 
-包里必带「首次安装」一节（探测 python-docx / node / chromium，缺什么补什么），否则换台机器第一步就卡住。
+包里必带「首次安装」一节（探测 `python-docx` / `pymupdf` / `soffice` / node / chromium，缺什么补什么；
+LibreOffice 只提示不代装），否则换台机器第一步就卡住。
 
 
 ---
 
 ## 版本
 
-当前 `v1.17`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
+当前 `v1.18`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
 
 每个版本对应一个 GitHub Release，源码 zip 不需要登录就能下：
 
 ```bash
 # 固定版本
-curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.17.zip
+curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.18.zip
 # 永远最新
 curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/heads/main.zip
 ```

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# 依赖隔离执行器。所有 Python 脚本都通过它跑，不要直接敲 python3。
+#
+#   ./工具/py 工具/check.py 生成物/xxx.docx --kind 01
+#   ./工具/py 工具/pdf_tools.py merge 生成物/合并.pdf a.pdf b.pdf
+#
+# 首次调用会自建 .venv（在仓库根或技能包根），用国内镜像装依赖，约 10 秒；
+# 之后直接转发，不再重复装。依赖坏了（解释器升级、目录被删）会自动重建。
+#
+# 为什么不用全局安装：本机有四个 python3，全局装只对其中一个生效，
+# 换解释器或换机器就静默失效。venv 路径确定，跨对话、跨项目都不会认错。
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(dirname "$HERE")"
+VENV="$ROOT/.venv"
+PY="$VENV/bin/python"
+
+MIRROR_TUNA="https://pypi.tuna.tsinghua.edu.cn/simple"
+MIRROR_ALI="https://mirrors.aliyun.com/pypi/simple"
+MIRROR_TENCENT="https://mirrors.cloud.tencent.com/pypi/simple"
+
+# pymupdf 锁 1.24.14：新版 2.x 会把 onnxruntime / numpy / networkx 当硬依赖拖进来，
+# 体积从 81MB 涨到 284MB，而合并 / 转图 / 抽图三个 API 在 1.24 上完全一样。
+DEPS=(python-docx "pymupdf==1.24.14")
+
+probe() { "$PY" -c "import docx, pymupdf" >/dev/null 2>&1; }
+
+if [ ! -x "$PY" ] || ! probe; then
+  echo "[py] 初始化依赖环境（一次性，约 10 秒）…" >&2
+  rm -rf "$VENV"
+  if ! python3 -m venv "$VENV" >/dev/null 2>&1; then
+    echo "[py] 建 venv 失败：找不到可用的 python3，请先装 Python 3.9+。" >&2
+    exit 2
+  fi
+  installed=0
+  for m in "$MIRROR_TUNA" "$MIRROR_ALI" "$MIRROR_TENCENT"; do
+    if "$PY" -m pip install -q --disable-pip-version-check --timeout 10 --retries 1 \
+         -i "$m" "${DEPS[@]}" >&2; then
+      installed=1
+      break
+    fi
+    echo "[py] 源不通，换下一个：$m" >&2
+  done
+  if [ "$installed" -ne 1 ]; then
+    echo "[py] 依赖装不上（清华 / 阿里 / 腾讯云三个镜像都试过）。" >&2
+    echo "[py] 大概率是网络或代理问题，没有改动系统环境，也没用 sudo。请把这段发给用户。" >&2
+    exit 3
+  fi
+  if ! probe; then
+    echo "[py] 装完仍 import 失败，请把上面的 pip 输出发给用户。" >&2
+    exit 4
+  fi
+fi
+
+exec "$PY" "$@"

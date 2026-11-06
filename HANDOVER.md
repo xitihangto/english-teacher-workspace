@@ -118,11 +118,14 @@
 
 > 口令改动的规则先记这里，等用户说升版时一次性结清。**没结清就不要打 tag。**
 
-**当前状态：✅ 已结清于 v1.17（2026-11-05 23:52）**，无待办。
+**当前状态：✅ 已结清于 v1.18（2026-11-06 15:00）**，无待办。
 
 | 时间 | 改了什么 | 涉及文件 |
 |---|---|---|
-| — | （暂无新待办） | — |
+| 2026-11-06 15:00 | 新增 `规范/05-PDF处理规则.md`：合并 / 转图 / 抽内嵌图 / Word 转 PDF 四条命令与依赖策略（默认不装、装只进 `.venv`、LibreOffice 不代装只给镜像地址） | `规范/05`（新建）、`工具/py`（新建）、`工具/pdf_tools.py`（新建） |
+| 2026-11-06 15:00 | `AGENTS.md` 硬规则第 12 条：依赖默认不装、只进 `.venv`、镜像顺序、禁 sudo / `brew --cask` / 下载 >50 MB / 改全局 `pip.conf`；路由表加 PDF 行；打包五类补 `工具/py`、`pdf_tools.py`；环境依赖段改成 `./工具/py` 口径 | `AGENTS.md` |
+| 2026-11-06 15:00 | `索引.md` / `HANDOVER.md` / `README.md` 同步：文件结构加 `.venv/`、链路表加 05、运行环境改为 venv 口径 | `索引.md`、`HANDOVER.md`、`README.md` |
+| 2026-11-06 15:00 | 技能包重新导出（v1.18），`scripts/py` 与 `scripts/pdf_tools.py` 入包，`SKILL.md` 加「按需安装：PDF」一节 | `生成物/技能包-20261106/` |
 
 > v1.16 收进的三条：① **Release 由 CI 自动建**（`.github/workflows/release.yml` + `工具/release_notes.py`，说明取自 `变更日志.md` 版本条目）；
 > ② **Release 验证归用户**，agent 推完就收工，不 `gh run watch`、不轮询、不为试 CI 推测试 tag；
@@ -141,6 +144,7 @@
 | **`原料/`** | 用户提供的原料、链接抓下来的原文件、OCR 中间文本；按任务名建子目录 | ❌ |
 | `jiangyi/` | 渲染层：`jy_builder.py`（`Book` 类）、`practice_style.py`，通用可复用 | ✅ |
 | `build/` | 一次性生成脚本（按某份卷写死，含整卷原文），用完即废 | ❌ |
+| `.venv/` | `工具/py` 自建的依赖环境；删掉下次自动重建，**不要手工往里装东西** | ❌ |
 
 **三条落地要求**：
 
@@ -248,7 +252,9 @@
 
 ## 3. 怎么生成 docx（技术实现）
 
-**环境**：`python3` 已装 `python-docx 1.2.0`（路径 `/Users/linquin/.workbuddy-ai/binaries/python/versions/3.13.12/bin/python3`）。
+**环境**：**一律用 `./工具/py` 跑 Python**，不要裸敲 `python3`。它首次调用会在仓库根建 `.venv`
+（`python-docx` + `pymupdf==1.24.14`，走国内镜像，约 10 秒），之后直接转发；依赖坏了会自动重建。
+本机有四个 `python3`，裸敲的那个不一定装了依赖，会出现「pip 说装好了、脚本却 import 失败」。
 
 **流程**：
 1. 读对应规范 md：**只读本体系那一份**（做讲义只读 `规范/01`，做批改只读 `规范/02`，做识别只读 `规范/03`，见 §0.7 路由），
@@ -455,14 +461,15 @@ run 上只写了 `w:cs`。用 `工具/check.py` 检查它们会报「不合格�
 | 项 | 实际情况 |
 |---|---|
 | 生成端 | 本机 macOS（最新版），中文版 Word |
-| Python | `3.13.12`，`python-docx 1.2.0`（`/Users/linquin/.workbuddy-ai/binaries/python/versions/3.13.12/bin/python3`） |
+| Python | `3.13.12`（`~/.workbuddy-ai/binaries/python/...`）；依赖装在 `.venv` 里，由 `工具/py` 管理：`python-docx` + `pymupdf==1.24.14` |
+| LibreOffice | 可选，只用于 `docx → pdf`（`工具/pdf_tools.py topdf`）；**agent 不代装**，缺了就只给国内镜像地址（`规范/05` §2.2） |
 | Node | `v22.22.2`（`~/.workbuddy-ai/binaries/node/...`），自带 `WebSocket`，04 的截包脚本用它 |
 | 无头浏览器 | `~/Library/Caches/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-mac-arm64/chrome-headless-shell` |
 | 成品接收方 | 最新版 macOS + 最新版**中文版 Word** + 常规字体（宋体、黑体、Times New Roman 都有） |
 
 **明确不需要考虑的场景**（用户已确认，不要为此写防御代码）：
 
-- WPS / 永中 / LibreOffice
+- WPS / 永中 打开成品（LibreOffice 只当可选的 `docx→pdf` 转换器，不当查看环境）
 - 旧版 Word（2010 及更早）
 - 英文版 Word、Windows 系统
 - 手机端打开 docx

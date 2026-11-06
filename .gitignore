@@ -17,3 +17,6 @@
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 工具/py 自建的依赖环境（python-docx + pymupdf），删了下次自动重建
+/.venv/
