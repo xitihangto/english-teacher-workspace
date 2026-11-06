@@ -61,11 +61,18 @@ def die(msg, code=3):
 
 
 def soffice_env():
-    """LibreOffice 自带的 fontconfig 编译时写死 /usr/local/etc/fonts，
-    这个目录在 macOS 上通常不存在，于是它读不到任何系统字体（中文全空白）。
-    这里用仓库自带的 fonts.conf 兜底，不改任何系统设置。"""
+    """macOS 上 LibreOffice 自带的 fontconfig 把配置目录编译死在
+    /usr/local/etc/fonts，这个目录默认不存在，于是它读不到任何系统字体
+    （中文整段空白）。这时用仓库自带的 fonts.conf 兜底。
+
+    Linux 有 /etc/fonts/fonts.conf，自带完整的中文回退规则，
+    千万不要覆盖，否则反而丢了字体替换链。"""
     env = os.environ.copy()
-    if not env.get("FONTCONFIG_FILE") and os.path.isfile(FONTS_CONF):
+    if env.get("FONTCONFIG_FILE"):
+        return env
+    if os.path.exists("/etc/fonts/fonts.conf"):
+        return env
+    if os.path.isfile(FONTS_CONF):
         env["FONTCONFIG_FILE"] = FONTS_CONF
     return env
 
