@@ -197,7 +197,7 @@ node 工具/xhs_grab.mjs "<预览页 URL>" 10000
 ## 接手检查清单
 
 - [ ] 读完了 `索引.md` 和 `HANDOVER.md`
-- [ ] `./工具/py 工具/check.py --help` 能跑（首次会自建 `.venv`，约 10 秒）
+- [ ] `./工具/py -c "import docx, pymupdf"` 能跑（首次会自建 `.venv`，约 10 秒）
 - [ ] 知道所有 Python 走 `./工具/py`，不裸敲 `python3`
 - [ ] 知道依赖默认不装、Word 转 PDF 的 LibreOffice 不代装（`规范/05` §2）
 - [ ] 知道三套体系的输入怎么判定（`HANDOVER.md` §2）
