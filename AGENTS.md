@@ -134,7 +134,9 @@
 2. **只装五类**：
    - 规则：`规范/` 下全部 md；
    - 版式参照：`模板/01-标准模式讲义.docx`、`模板/02-标准模式批改.docx`、`示例/02-示例-批改稿.docx`；
-   - 可执行件：`工具/py`（依赖执行器，**必须带**）、`工具/check.py`、`工具/pdf_tools.py`、
+   - 可执行件：`工具/py`（依赖执行器，**必须带**）、`工具/check.py`、
+     `工具/pdf_tools.py` 与 `工具/fonts.conf`（**必须同目录一起带**，转 PDF 时靠后者兜底字体）、
+     `工具/LibreOffice-中文字体.command`（给图形界面用，可带可不带）、
      `工具/strip_watermark.py`、`工具/xhs_grab.mjs`、`jiangyi/jy_builder.py`、`jiangyi/practice_style.py`；
    - 硬知识：`技术要点.md` 只裁三节（字体四槽 / Word XML 元素顺序 / 表格固定布局），其余不要；
    - 特殊指令：本文的硬规则 + `HANDOVER.md` 的目录约定 + 规则路由表，压成 SKILL.md 开头的「硬规矩」。

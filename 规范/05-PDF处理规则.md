@@ -67,6 +67,44 @@
 **不许静默降级**：不能因为没装 LibreOffice 就偷偷截图拼 PDF、或拿 `qlmanage` 缩略图糊弄——
 那正是 `AGENTS.md` 第 11 条明令禁止的"渲染核对"路子，出来的东西不能用。
 
+### 2.3 字体：转 PDF 前唯一要先确认的东西
+
+**这是本规范里唯一"看起来像转换出错、其实是环境"的问题。先查字体，别去改版式。**
+
+**macOS —— LibreOffice 26.x 读不到任何系统字体**
+
+LibreOffice 自带的 fontconfig 把配置目录编译死在 `/usr/local/etc/fonts`，macOS 默认没有这个目录，
+它于是扫不到一个系统字体：中文整段**空白**（不是方框），字体列表里宋体 / 黑体 / 苹方全部消失。
+
+- `工具/pdf_tools.py` 已兜底：系统没有 `/etc/fonts/fonts.conf` 时，调 soffice 前把 `FONTCONFIG_FILE`
+  指到 `工具/fonts.conf`。只作用于该进程，不改系统设置、不改全局 `fonts.conf`。
+- 宋体本身也不在 macOS 里：只藏在 `Microsoft Word.app/Contents/Resources/DFonts/Simsun.ttc`，
+  且是 `.ttc` 集合文件，CoreText 直接判无效。Word / WPS 能显示是因为它们读自己的字体包，不走系统库。
+- 要在 Keynote / Pages 里用宋体：用 fontTools 把 ttc 拆成单文件 `SimSun.ttf` / `NSimSun.ttf`，
+  **剥掉内嵌点阵表（EBDT / EBLC）**后 CoreText 才收，装进 `~/Library/Fonts`；删文件即还原，不碰系统目录。
+- 图形界面同理：双击 `工具/LibreOffice-中文字体.command` 启动，就带上同样的配置。
+
+**Linux —— 不出上面那个故障，但宋体一律不存在**
+
+Linux 有 `/etc/fonts/fonts.conf` 和 `conf.d` 里整套 CJK 回退规则，字体枚举正常。
+**此时不许覆盖 `FONTCONFIG_FILE`**，覆盖反而会把系统回退链顶掉，转出来更怪。
+
+但宋体 / 黑体 / Times New Roman 是微软商业字体，任何发行版都不带。先装 CJK 字体：
+
+```bash
+sudo apt install fonts-noto-cjk                 # Debian / Ubuntu
+sudo dnf install google-noto-sans-cjk-fonts     # Fedora
+```
+
+这步要 sudo，**agent 不代跑，只提示**。
+
+- 装了：中文正常出，但字形是替代字体（Noto Sans CJK 等），不是宋体；字宽不同，断行与总页数会漂。
+- 不装：整段空白，和 macOS 那个故障看着一样、原因不同。
+- Linux 上没有 Word，「在 Word 里另存为 PDF」这条兜底路走不通，只剩 LibreOffice 加字体一条链。
+
+**体检**：`topdf` 转完会自查——正文有中文却一个中文字体都没嵌，直接告警。
+看到这条告警先查字体，别改版式。
+
 ---
 
 ## 3. 命令清单（照抄，别自己造轮子）
@@ -102,6 +140,7 @@
 
 - **docx → PDF 会重排字体**：soffice 用的是系统字库，机器上没装宋体 / Times New Roman 时会被替换，
   行距和断行都会漂。看着像"转换出错"，其实是字体缺失——先查字体，别去改版式。
+  Linux 上宋体必然缺失（见 §2.3），替代字体字宽不同，页数漂移属正常，交付时说明一句。
 - **抽图只能抽真内嵌位图**：矢量图、被蒙版或裁切处理的图抽出来会残缺。遇到这种情况退到 `toimg`
   整页渲染再裁，不要在抽图上反复试。
 - **加密 PDF 直接报错**，请用户给无密码版本，不尝试破解。
