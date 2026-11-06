@@ -44,9 +44,53 @@ MIRROR_HINT = """\
 或者更省事：在 Word 里打开该 docx，文件 → 另存为 → PDF，零安装。"""
 
 
+FONTS_CONF = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts.conf")
+
+# PDF 里出现这些字体名，才说明中文字体真的接上了
+CJK_HINT = (
+    "simsun", "simhei", "songti", "stsong", "heiti", "sthei", "pingfang",
+    "kaiti", "fangsong", "ming", "noto sans cjk", "noto serif cjk",
+    "source han", "hiragino", "yuanti", "libian", "baoli", "wawati",
+    "xingkai", "yuppy", "hannari", "weibei", "lantinghei",
+)
+
+
 def die(msg, code=3):
     print(f"[pdf] {msg}", file=sys.stderr)
     sys.exit(code)
+
+
+def soffice_env():
+    """LibreOffice 自带的 fontconfig 编译时写死 /usr/local/etc/fonts，
+    这个目录在 macOS 上通常不存在，于是它读不到任何系统字体（中文全空白）。
+    这里用仓库自带的 fonts.conf 兜底，不改任何系统设置。"""
+    env = os.environ.copy()
+    if not env.get("FONTCONFIG_FILE") and os.path.isfile(FONTS_CONF):
+        env["FONTCONFIG_FILE"] = FONTS_CONF
+    return env
+
+
+def warn_if_no_cjk_font(path):
+    """转完体检：正文有中文、PDF 里却一个中文字体都没嵌，等于白转。"""
+    doc = pymupdf.open(path)
+    fonts, text = set(), ""
+    for page in doc:
+        for f in page.get_fonts(full=True):
+            fonts.add(f[3].lower())
+        if len(text) < 3000:
+            text += page.get_text()
+    doc.close()
+    has_cjk_text = any("\u4e00" <= ch <= "\u9fff" for ch in text)
+    has_cjk_font = any(h in name for name in fonts for h in CJK_HINT)
+    if has_cjk_text and not has_cjk_font:
+        print(
+            "[pdf] 警告：这份 PDF 有中文，但没嵌入任何中文字体，中文会显示为空白。\n"
+            f"[pdf] 检查 FONTCONFIG_FILE={FONTS_CONF} 是否可用，"
+            "或把宋体/黑体装进 ~/Library/Fonts 后重转。",
+            file=sys.stderr,
+        )
+        return False
+    return True
 
 
 def need_file(path):
@@ -159,14 +203,15 @@ def cmd_topdf(args):
     outdir = os.path.dirname(os.path.abspath(args.out or args.input)) or "."
     os.makedirs(outdir, exist_ok=True)
     cmd = [exe, "--headless", "--norestore", "--convert-to", "pdf", "--outdir", outdir, args.input]
-    r = subprocess.run(cmd, capture_output=True, text=True)
+    r = subprocess.run(cmd, capture_output=True, text=True, env=soffice_env())
     if r.returncode != 0:
         die(f"转换失败：{(r.stderr or r.stdout).strip()[:400]}", 4)
     produced = os.path.join(outdir, os.path.splitext(os.path.basename(args.input))[0] + ".pdf")
     if args.out and os.path.abspath(args.out) != os.path.abspath(produced):
         os.replace(produced, args.out)
         produced = args.out
-    print(f"已转出 {produced}")
+    ok = warn_if_no_cjk_font(produced)
+    print(f"已转出 {produced}" + ("" if ok else "（中文字体缺失，见上方警告）"))
     return 0
 
 
