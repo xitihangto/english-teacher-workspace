@@ -118,10 +118,14 @@
 
 > 口令改动的规则先记这里，等用户说升版时一次性结清。**没结清就不要打 tag。**
 
-**当前状态：✅ 已结清于 v1.18（2026-11-06 15:00）**，无待办。
+**当前状态：✅ 已结清于 v1.19（2026-11-07 05:30）**，无待办。
 
 | 时间 | 改了什么 | 涉及文件 |
 |---|---|---|
+| 2026-11-07 05:30 | `规范/05` 新增 §2.3「字体」：macOS 上 LibreOffice 自带 fontconfig 配置目录写死 `/usr/local/etc/fonts`（不存在 → 扫不到任何系统字体，中文整段空白）；Linux 不出该故障但宋体/黑体一律没有，需先装 `fonts-noto-cjk`，且系统有 `/etc/fonts/fonts.conf` 时不许覆盖 `FONTCONFIG_FILE` | `规范/05` |
+| 2026-11-07 05:30 | `pdf_tools.py` 增加 `soffice_env()`（仅在系统无 fontconfig 配置时挂 `工具/fonts.conf`）与 `warn_if_no_cjk_font()`（转完自查中文是否落地）；新增 `工具/fonts.conf`、`工具/LibreOffice-中文字体.command` | `工具/pdf_tools.py`、`工具/fonts.conf`（新建）、`工具/LibreOffice-中文字体.command`（新建） |
+| 2026-11-07 05:30 | 打包清单补 `fonts.conf`（须与 `pdf_tools.py` 同目录一起带）、`LibreOffice-中文字体.command`；`索引.md` 文件结构同步 | `AGENTS.md`、`索引.md` |
+| 2026-11-07 05:30 | 技能包重新导出（v1.19），`scripts/fonts.conf` 入包，`SKILL.md` 补字体前置条件一节 | `生成物/技能包-20261107/` |
 | 2026-11-06 15:00 | 新增 `规范/05-PDF处理规则.md`：合并 / 转图 / 抽内嵌图 / Word 转 PDF 四条命令与依赖策略（默认不装、装只进 `.venv`、LibreOffice 不代装只给镜像地址） | `规范/05`（新建）、`工具/py`（新建）、`工具/pdf_tools.py`（新建） |
 | 2026-11-06 15:00 | `AGENTS.md` 硬规则第 12 条：依赖默认不装、只进 `.venv`、镜像顺序、禁 sudo / `brew --cask` / 下载 >50 MB / 改全局 `pip.conf`；路由表加 PDF 行；打包五类补 `工具/py`、`pdf_tools.py`；环境依赖段改成 `./工具/py` 口径 | `AGENTS.md` |
 | 2026-11-06 15:00 | `索引.md` / `HANDOVER.md` / `README.md` 同步：文件结构加 `.venv/`、链路表加 05、运行环境改为 venv 口径 | `索引.md`、`HANDOVER.md`、`README.md` |
