@@ -89,7 +89,7 @@
 
 - **打包**：把仓库名（或链接）丢给任意 agent，说一句「打包成技能包」——甚至不用说，它读到 `AGENTS.md` 就知道。
   它会现场探测 tag 与未提交改动，只装规则 / 模板 / 脚本 / 硬知识 / 硬规矩五类，
-产出 `<用户文档目录>/技能包-<日期>/` 与同名 zip（macOS `~/Documents`、Windows `%USERPROFILE%\Documents`、Linux `$XDG_DOCUMENTS_DIR`）。
+产出 `<用户文档目录>/<仓库名>-技能包-<日期>/` 与同名 zip（名字带仓库名，文稿里堆几份也分得清）（macOS `~/Documents`、Windows `%USERPROFILE%\Documents`、Linux `$XDG_DOCUMENTS_DIR`）。
 **技能包不进 `生成物/`**——那是给 Word 成品的，技能包是仓库自述。
 - **安装**：把 zip 直接丢进对话，说「安装」——或者什么都不说也行，agent 认得出根目录的 `SKILL.md` + frontmatter，
   会装到 `~/.workbuddy-ai/skills/<name>/` 并回一句触发词。
