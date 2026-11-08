@@ -207,6 +207,18 @@ node 工具/xhs_grab.mjs "<预览页 URL>" 10000
 200 MB 依赖）。04 另需 node 与 chromium_headless_shell（路径见 `HANDOVER.md` §9），
 没有时退到系统 Chrome 的 `--headless --remote-debugging-port=9333`，CDP 协议一致，脚本不用改。
 
+### 本机状态（已结清，别再查）
+
+**这台机器（`/Users/linquin/WorkBuddy AI/EnglishTeacher-Workspace`）于 2026-11-08 已结清**：
+`.venv` 可用（`python-docx` + `pymupdf` + `fontTools`）、`~/Library/Fonts` 下有宋体 / 新宋体 / 黑体 /
+楷体 / 仿宋、`/Applications/LibreOffice.app` 可用且已修好中文字体（见 `规范/05` §2.3）。
+
+**有这行记录就不再查环境**：不跑 `import` 探活、不查字体、不试 `soffice`。
+环境问题会以「命令报错」的形式自己出现（import 失败 / 转换返回非零 / 体检报中文空白），
+那才是回头查的时机。**只有两种情况需要查**：① 换了一台机器或换了仓库路径；② 装技能到新环境
+（那是一次性安装检查，见《两个自服务动作》B）。
+这条与硬规则第 13 条配套——预防性检查是最典型的"自己吓自己"。
+
 
 ---
 
