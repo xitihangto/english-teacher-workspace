@@ -150,8 +150,10 @@
      `工具/pdf_tools.py` 与 `工具/fonts.conf`（**必须同目录一起带**，转 PDF 时靠后者兜底字体）、
      `工具/LibreOffice-中文字体.command`（给图形界面用，可带可不带）、
      `工具/strip_watermark.py`、`工具/xhs_grab.mjs`、`jiangyi/jy_builder.py`、`jiangyi/practice_style.py`；
-   - 硬知识：`技术要点.md` 只裁三节（字体四槽 / Word XML 元素顺序 / 表格固定布局），其余不要；
-   - 特殊指令：本文的硬规则 + `HANDOVER.md` 的目录约定 + 规则路由表，压成 SKILL.md 开头的「硬规矩」。
+   - 硬知识：`技术要点-硬知识.md`（仓库根，三节：字体四槽 / Word XML 元素顺序 / 表格固定布局），
+     由 `技术要点.md` 裁出后单独维护——**它只进包、不进日常流程**，两份都受版本管理；
+   - 包内说明：`技能包-README.md`（仓库根）→ 包根 `README.md`，给装技能的人看；
+   - 特殊指令：本文的硬规则 + `HANDOVER.md` 的目录约定 + 规则路由表，压成 `SKILL.md` 的「硬规矩」。
 3. **明确不带**：`变更日志.md`、`索引.md`、`README.md`、`HANDOVER.md` 的待办与版本史、`生成物/`、`原料/`、
    `build/` 与 `jiangyi/build_*.py`（一次性脚本，见 `.gitignore`）。
 4. **SKILL.md ≤ 180 行**：开头 5 行说干什么、什么时候触发（触发词照抄）；规则路由表；硬规矩；**首次安装**；
