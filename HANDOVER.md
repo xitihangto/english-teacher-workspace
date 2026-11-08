@@ -118,10 +118,13 @@
 
 > 口令改动的规则先记这里，等用户说升版时一次性结清。**没结清就不要打 tag。**
 
-**当前状态：✅ 已结清于 v1.19（2026-11-07 05:30）**，无待办。
+**当前状态：✅ 已结清于 v1.20（2026-11-08 19:10）**，无待办。
 
 | 时间 | 改了什么 | 涉及文件 |
 |---|---|---|
+| 2026-11-08 19:10 | `规范/02` §9 新增：自检只有一步 `check.py --kind 02`，不转 PDF、不查字体、不渲染成图核对；字体与 `soffice` 属 `规范/05`，只在用户明确要 PDF 时碰 | `规范/02` |
+| 2026-11-08 19:10 | `AGENTS.md` 第 11 条补：字体和 `soffice` 不属于自检，交付 docx 时查字体、转 PDF 看版式属白跑 | `AGENTS.md` |
+| 2026-11-08 19:10 | 技能包重新导出（v1.20），`SKILL.md` 自检段落同步 | `生成物/技能包-20261108/` |
 | 2026-11-07 05:30 | `规范/05` 新增 §2.3「字体」：macOS 上 LibreOffice 自带 fontconfig 配置目录写死 `/usr/local/etc/fonts`（不存在 → 扫不到任何系统字体，中文整段空白）；Linux 不出该故障但宋体/黑体一律没有，需先装 `fonts-noto-cjk`，且系统有 `/etc/fonts/fonts.conf` 时不许覆盖 `FONTCONFIG_FILE` | `规范/05` |
 | 2026-11-07 05:30 | `pdf_tools.py` 增加 `soffice_env()`（仅在系统无 fontconfig 配置时挂 `工具/fonts.conf`）与 `warn_if_no_cjk_font()`（转完自查中文是否落地）；新增 `工具/fonts.conf`、`工具/LibreOffice-中文字体.command` | `工具/pdf_tools.py`、`工具/fonts.conf`（新建）、`工具/LibreOffice-中文字体.command`（新建） |
 | 2026-11-07 05:30 | 打包清单补 `fonts.conf`（须与 `pdf_tools.py` 同目录一起带）、`LibreOffice-中文字体.command`；`索引.md` 文件结构同步 | `AGENTS.md`、`索引.md` |
