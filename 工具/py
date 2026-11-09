@@ -7,7 +7,9 @@
 # 首次调用会自建 .venv（在仓库根或技能包根），用国内镜像装依赖，约 10 秒；
 # 之后直接转发，不再重复装。依赖坏了（解释器升级、目录被删）会自动重建。
 #
-# 为什么不用全局安装：本机有四个 python3，全局装只对其中一个生效，
+# 解释器怎么选：把「agent 自带的」和「系统自带的」都列出来，取版本最高的一个（只要是 3.x）；
+# 高版本万一还没有预编译包，就退到下一个。全都没有才提示用户装 Python。
+# 为什么不用全局安装：本机常有四个 python3，全局装只对其中一个生效，
 # 换解释器或换机器就静默失效。venv 路径确定，跨对话、跨项目都不会认错。
 
 set -uo pipefail
@@ -27,30 +29,62 @@ DEPS=(python-docx "pymupdf==1.24.14")
 
 probe() { "$PY" -c "import docx, pymupdf" >/dev/null 2>&1; }
 
+# 候选解释器：agent 自带的版本目录 + PATH 上的 + 常见固定位置，去重
+candidates() {
+  {
+    for p in "$HOME"/.workbuddy-ai/binaries/python/versions/*/bin/python3 \
+             "$HOME"/.local/share/uv/python/*/bin/python3 \
+             "$HOME"/.pyenv/versions/*/bin/python3; do
+      [ -x "$p" ] && echo "$p"
+    done
+    which -a python3 2>/dev/null
+    echo /opt/homebrew/bin/python3
+    echo /usr/local/bin/python3
+    echo /usr/bin/python3
+  } | awk '!seen[$0]++'
+}
+
+# 按 minor 版本从高到低排（只要 major 是 3）
+ranked() {
+  candidates | while IFS= read -r p; do
+    m=$("$p" -c 'import sys;print(sys.version_info[1] if sys.version_info[0]==3 else -1)' 2>/dev/null) || continue
+    [ "$m" -ge 0 ] 2>/dev/null && printf '%s\t%s\n' "$m" "$p"
+  done | sort -rn | cut -f2 | head -3
+}
+
 if [ ! -x "$PY" ] || ! probe; then
   echo "[py] 初始化依赖环境（一次性，约 10 秒）…" >&2
-  rm -rf "$VENV"
-  if ! python3 -m venv "$VENV" >/dev/null 2>&1; then
-    echo "[py] 建 venv 失败：找不到可用的 python3，请先装 Python 3.10+。" >&2
-    exit 2
-  fi
-  installed=0
-  for m in "$MIRROR_TUNA" "$MIRROR_ALI" "$MIRROR_TENCENT"; do
-    if "$PY" -m pip install -q --disable-pip-version-check --timeout 10 --retries 1 \
-         -i "$m" "${DEPS[@]}" >&2; then
-      installed=1
+  ok=0
+  for cand in $(ranked); do
+    ver=$("$cand" -c 'import sys;print("%d.%d" % sys.version_info[:2])' 2>/dev/null) || continue
+    echo "[py] 试用 ${cand}（Python ${ver}）" >&2
+    rm -rf "$VENV"
+    if ! "$cand" -m venv "$VENV" >/dev/null 2>&1; then
+      echo "[py] 这个解释器建不了 venv，换下一个" >&2
+      continue
+    fi
+    installed=0
+    for m in "$MIRROR_TUNA" "$MIRROR_ALI" "$MIRROR_TENCENT"; do
+      # --only-binary：没有预编译包就立刻失败，不留在本地编译 mupdf 那种坑里
+      if "$PY" -m pip install -q --disable-pip-version-check --timeout 10 --retries 1 \
+           --only-binary=:all: -i "$m" "${DEPS[@]}" >&2; then
+        installed=1
+        break
+      fi
+      echo "[py] 源不通，换下一个：$m" >&2
+    done
+    if [ "$installed" -eq 1 ] && probe; then
+      ok=1
+      echo "[py] 已用 ${cand} 建好环境" >&2
       break
     fi
-    echo "[py] 源不通，换下一个：$m" >&2
+    echo "[py] ${cand} 装不上依赖（多半是这版 Python 还没有预编译包），换下一个" >&2
   done
-  if [ "$installed" -ne 1 ]; then
-    echo "[py] 依赖装不上（清华 / 阿里 / 腾讯云三个镜像都试过）。" >&2
-    echo "[py] 大概率是网络或代理问题，没有改动系统环境，也没用 sudo。请把这段发给用户。" >&2
-    exit 3
-  fi
-  if ! probe; then
-    echo "[py] 装完仍 import 失败，请把上面的 pip 输出发给用户。" >&2
-    exit 4
+  if [ "$ok" -ne 1 ]; then
+    echo "[py] 试过的解释器都不行。" >&2
+    echo "[py] 这台机器上没有可用的 Python 3，或者网络全断：请装任意 Python 3（3.10 以上最稳），" >&2
+    echo "[py] 或让 agent 用它自带的解释器重试。没有改动系统环境，也没用 sudo。" >&2
+    exit 2
   fi
 fi
 

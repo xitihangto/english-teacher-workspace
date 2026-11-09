@@ -139,8 +139,11 @@ PDF 是**换壳工序**：不改内容，只改形态。
 | `jiangyi/jy_builder.py` | 讲义渲染层 |
 | `jiangyi/practice_style.py` | 练习版版式层 |
 
-运行环境：macOS 或 Linux，Python **3.10+**（依赖进 `.venv`；3.9 其实也能跑——脚本里没有 3.10 专有语法，
-但不再专门验证，macOS 自带的 3.9.6 就是这一档）、Node 22+、可选 LibreOffice；Linux 另需中文字体
+运行环境：macOS 或 Linux，**Python 3.x 任意版本**、Node 22+、可选 LibreOffice。
+Python 不用你挑：`scripts/py` 会把 agent 自带的（`~/.workbuddy-ai/binaries/python`、`uv`、`pyenv`）
+和系统自带的（PATH、`/opt/homebrew/bin`、`/usr/local/bin`、`/usr/bin`）都探一遍，
+**取版本最高的那个建 `.venv`**；高版本还没有预编译包时会自动退到下一个；**全都没有才提示装 Python**。
+Linux 另需中文字体
 （`fonts-noto-cjk`），否则转 PDF 中文空白。镜像顺序 清华 → 阿里 → 腾讯云；**不许改全局 `pip.conf`**，不许 sudo。
 
 ## 边界（读一次，别踩）
