@@ -44,18 +44,20 @@ candidates() {
   } | awk '!seen[$0]++'
 }
 
-# 按 minor 版本从高到低排（只要 major 是 3）
+# 按 minor 版本从高到低排（只要 major 是 3），同一 minor 只留一个路径，
+# 免得三个候选其实是同一个版本，把更低但能用的版本挤掉
 ranked() {
   candidates | while IFS= read -r p; do
     m=$("$p" -c 'import sys;print(sys.version_info[1] if sys.version_info[0]==3 else -1)' 2>/dev/null) || continue
     [ "$m" -ge 0 ] 2>/dev/null && printf '%s\t%s\n' "$m" "$p"
-  done | sort -rn | cut -f2 | head -3
+  done | sort -rn | awk -F'\t' '!seen[$1]++ {print $2}' | head -3
 }
 
 if [ ! -x "$PY" ] || ! probe; then
   echo "[py] 初始化依赖环境（一次性，约 10 秒）…" >&2
   ok=0
-  for cand in $(ranked); do
+  while IFS= read -r cand; do
+    [ -n "$cand" ] || continue
     ver=$("$cand" -c 'import sys;print("%d.%d" % sys.version_info[:2])' 2>/dev/null) || continue
     echo "[py] 试用 ${cand}（Python ${ver}）" >&2
     rm -rf "$VENV"
@@ -79,7 +81,7 @@ if [ ! -x "$PY" ] || ! probe; then
       break
     fi
     echo "[py] ${cand} 装不上依赖（多半是这版 Python 还没有预编译包），换下一个" >&2
-  done
+  done < <(ranked)
   if [ "$ok" -ne 1 ]; then
     echo "[py] 试过的解释器都不行。" >&2
     echo "[py] 这台机器上没有可用的 Python 3，或者网络全断：请装任意 Python 3（3.10 以上最稳），" >&2
