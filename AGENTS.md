@@ -166,9 +166,9 @@
    **不许在技能包里直接改 `SKILL.md`**，改了下次导出就被覆盖，而且两份会越走越远。
 5. **副本元信息**：SKILL.md 顶部与每个被复制的规则文件第一行各标一句「本副本导出自 …；以仓库 tag 为准，冲突时以仓库为准」；
    并写明包内规则是只读快照，要改规则回仓库改、改完重新导出。
-6. **产出**：`<用户文档目录>/<仓库名>-技能包-<YYYYMMDD>/`（SKILL.md 在根，规则与模板进 `references/`，脚本进 `scripts/`）+ 同名 zip。
-   **名字里必须带仓库名**（`english-teacher-workspace`），再加日期——单看一个 `技能包-20261109` 不知道是谁的包，
-   文稿里堆几份就分不清了。脚本里的 `REPO_NAME` 是唯一出处，改仓库名时改那一处。
+6. **产出**：`<用户文档目录>/技能包-<仓库名>-<YYYYMMDD>.zip`（包内 SKILL.md 在根，规则与模板进 `references/`，脚本进 `scripts/`）。
+   **名字固定为 `技能包-<仓库名>-<YYYYMMDD>`**，如 `技能包-english-teacher-workspace-20261109.zip`——
+   单看 `技能包-20261109` 不知道是谁的包。脚本里的 `REPO_NAME` 是唯一出处，改仓库名时改那一处。
    **不进 `生成物/`**——技能包是仓库的自述，不是教学产物，放进去等于自指。
    用户文档目录按平台取：macOS `~/Documents`、Windows `%USERPROFILE%\Documents`、
    Linux 先读 `$XDG_DOCUMENTS_DIR`，没有就 `~/Documents`；目录不存在就建。

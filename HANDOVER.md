@@ -122,6 +122,7 @@
 
 | 时间 | 改了什么 | 涉及文件 |
 |---|---|---|
+| 2026-11-09 18:35 | 包名格式改为 `技能包-<仓库名>-<YYYYMMDD>.zip`，前缀固定「技能包」 | `build/export_skill.py`、`AGENTS.md` |
 | 2026-11-09 18:30 | 打包后删除中间目录，只留 zip；清理 生成物/ 与文稿里的历史包目录与旧 zip | `build/export_skill.py`、`AGENTS.md` |
 | 2026-11-09 18:30 | 技能包重新导出（v1.23）到 `~/Documents/english-teacher-workspace-技能包-20261109/`，21 文件；`SKILL.md` 157 行，运行环境改为「Python 任意 3.x」 | `~/Documents/english-teacher-workspace-技能包-20261109/` |
 | 2026-11-09 17:15 | Python 改为「任意 3.x，自动挑最高」：`工具/py` 探 agent 自带与系统自带的解释器，取最高建 venv，没预编译包就退下一个，全无才提示安装 | `工具/py`、`SKILL.md`、`AGENTS.md` |
