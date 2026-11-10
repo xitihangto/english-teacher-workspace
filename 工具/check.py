@@ -78,6 +78,34 @@ def check(path, kind=None):
         else:
             problems.append('找不到 w:pgMar（未设置页边距）')
 
+    # ---- 4.5) 表格宽度 ----
+    # 换算坑：tblW / gridCol 的单位是 twips，1 cm = 567。写成 cm÷2.54×567 会让表只剩一半宽。
+    pg = re.search(r'<w:pgSz[^>]*w:w="(\d+)"', xml)
+    mar = re.search(r'<w:pgMar[^>]*>', xml)
+    text_w = None
+    if pg and mar:
+        l = re.search(r'w:left="(\d+)"', mar.group(0))
+        r = re.search(r'w:right="(\d+)"', mar.group(0))
+        if l and r:
+            text_w = int(pg.group(1)) - int(l.group(1)) - int(r.group(1))
+    for i, tbl in enumerate(re.findall(r'<w:tbl>.*?</w:tbl>', xml, re.S), 1):
+        mw = re.search(r'<w:tblW([^>]*)/>', tbl)
+        cols = [int(x) for x in re.findall(r'<w:gridCol[^>]*w:w="(\d+)"', tbl)]
+        if not mw:
+            problems.append(f'第 {i} 张表没有 w:tblW（宽度未固定）')
+            continue
+        typ = re.search(r'w:type="(\w+)"', mw.group(1))
+        wv = re.search(r'w:w="(\d+)"', mw.group(1))
+        if (typ and typ.group(1) != 'dxa') or not wv:
+            problems.append(f'第 {i} 张表宽未固定（type={typ.group(1) if typ else "?"}）')
+            continue
+        tw = int(wv.group(1))
+        if cols and abs(tw - sum(cols)) > 20:
+            problems.append(f'第 {i} 张表 tblW={tw} 与列宽之和 {sum(cols)} 不一致')
+        if text_w and tw < text_w * 0.6:
+            problems.append(f'第 {i} 张表只有 {tw / 567:.1f}cm，版心 {text_w / 567:.1f}cm'
+                            f'（疑似 twips 换算写错）')
+
     # ---- 5) 空行统计（必须先剔除表格）----
     body = re.sub(r'<w:tbl>.*?</w:tbl>', '', xml, flags=re.S)
     text = re.sub(r'<[^>]+>', '', body.replace('</w:p>', '\n'))

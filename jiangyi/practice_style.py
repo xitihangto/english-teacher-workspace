@@ -136,6 +136,15 @@ def fix_layout(t, widths_cm):
                                 'w:tblBorders', 'w:shd', 'w:tblLayout',
                                 'w:tblCellMar', 'w:tblLook', 'w:tblCaption',
                                 'w:tblDescription')
+    # 缩进归零：不写的话，样式里一旦带 tblInd，整张表会整体右移，与页边距对不齐
+    for el in tblPr.findall(qn('w:tblInd')):
+        tblPr.remove(el)
+    ind = OxmlElement('w:tblInd')
+    ind.set(qn('w:type'), 'dxa')
+    ind.set(qn('w:w'), '0')
+    tblPr.insert_element_before(ind, 'w:tblBorders', 'w:shd', 'w:tblLayout',
+                                'w:tblCellMar', 'w:tblLook', 'w:tblCaption',
+                                'w:tblDescription')
     layout = OxmlElement('w:tblLayout')
     layout.set(qn('w:type'), 'fixed')
     tblPr.insert_element_before(layout, 'w:tblCellMar', 'w:tblLook',
@@ -154,6 +163,11 @@ def fix_layout(t, widths_cm):
 
 
 def box_table(doc, rows, widths=None, center=True):
+    """表格。给了 widths 就按它固定列宽（cm）；不给就交给 Word 自适应。
+
+    widths 必须与列数等长——长度不对直接报错，不要静默忽略：
+    这个参数以前是死的，传了也不生效，属于最难查的那类毛病。
+    """
     t = doc.add_table(rows=len(rows), cols=len(rows[0]))
     t.style = 'Table Grid'
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -161,6 +175,10 @@ def box_table(doc, rows, widths=None, center=True):
     for r, row in enumerate(rows):
         for c, val in enumerate(row):
             cell_text(t.cell(r, c), val)
+    if widths:
+        if len(widths) != len(rows[0]):
+            raise ValueError(f'widths 给了 {len(widths)} 个，但表格有 {len(rows[0])} 列')
+        fix_layout(t, widths)
     return t
 
 
