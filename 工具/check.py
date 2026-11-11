@@ -19,6 +19,9 @@ def check(path, kind=None):
     zf = zipfile.ZipFile(path)
     xml = zf.read('word/document.xml').decode('utf-8')
     problems = []
+    # 模板与成品的标准不同：模板允许靠主题继承字体、允许表格 auto 宽度，
+    # 那是作者有意留的；成品才要求四槽写死、表宽固定。
+    is_template = '模板' in str(path)
 
     # ---- 1) 字体四槽（三套体系通用）----
     fonts = re.findall(r'<w:rFonts[^>]*>', xml)
@@ -38,7 +41,7 @@ def check(path, kind=None):
     except KeyError:
         pass
 
-    if bad:
+    if bad and not (is_template and theme_based):
         msg = f'字体四槽不合格 {len(bad)}/{len(fonts)} 处（缺 w:eastAsia 或 w:hint）'
         if theme_based:
             msg += '｜该文档字体主要靠主题继承（w:*Theme），模板属正常，成品必须显式写四槽'
@@ -80,6 +83,7 @@ def check(path, kind=None):
 
     # ---- 4.5) 表格宽度 ----
     # 换算坑：tblW / gridCol 的单位是 twips，1 cm = 567。写成 cm÷2.54×567 会让表只剩一半宽。
+    # 模板不查这条：模板里的 auto 是作者有意留的「随内容伸缩」，按成品标准要求固定宽会改掉它原本的行为。
     pg = re.search(r'<w:pgSz[^>]*w:w="(\d+)"', xml)
     mar = re.search(r'<w:pgMar[^>]*>', xml)
     text_w = None
@@ -88,7 +92,7 @@ def check(path, kind=None):
         r = re.search(r'w:right="(\d+)"', mar.group(0))
         if l and r:
             text_w = int(pg.group(1)) - int(l.group(1)) - int(r.group(1))
-    for i, tbl in enumerate(re.findall(r'<w:tbl>.*?</w:tbl>', xml, re.S), 1):
+    for i, tbl in enumerate([] if is_template else re.findall(r'<w:tbl>.*?</w:tbl>', xml, re.S), 1):
         mw = re.search(r'<w:tblW([^>]*)/>', tbl)
         cols = [int(x) for x in re.findall(r'<w:gridCol[^>]*w:w="(\d+)"', tbl)]
         if not mw:
