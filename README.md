@@ -103,13 +103,13 @@ LibreOffice 只提示不代装），否则换台机器第一步就卡住。
 
 ## 版本
 
-当前 `v1.25`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
+当前 `v1.26`。**改规则和升版是两件事**：口令只改本地文件，用户说升版才打 tag 推送。
 
 每个版本对应一个 GitHub Release，源码 zip 不需要登录就能下：
 
 ```bash
 # 固定版本
-curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.25.zip
+curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/tags/v1.26.zip
 # 永远最新
 curl -LO https://github.com/xitihangto/english-teacher-workspace/archive/refs/heads/main.zip
 ```
