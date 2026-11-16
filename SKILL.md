@@ -8,6 +8,9 @@ description: 高三英语文档生产线。发考卷+答案出备课讲义、发
 把考卷 / 作文 / 试卷图 / 一条链接变成符合固定版式的 Word，也能把成品转成 PDF、把几份 PDF 合并或拆图。
 发素材 + 一句话就出成品，不需要问格式要求——版式写死在 `规范/` 里。
 
+**本包是纯文件，不依赖任何平台的技能格式。** 宿主认开头的 frontmatter 就拿它做索引，不认就忽略——
+正文照读，行为不变。只要能读文件、能跑 Python，装到哪个 agent 里都一样。
+
 **本文件是仓库根的技能入口。** 拿到这个仓库的 agent，读这一份就知道要干什么、该去读哪份规范。
 技能包里的 `SKILL.md` 由 `build/export_skill.py` 从这里生成（改写路径 + 加版本头），
 **不要在技能包里直接改那份**，改了下次导出就被覆盖。
@@ -67,7 +70,7 @@ PDF 是**换壳工序**：不改内容，只改形态。
 
 ## 首次安装（仅第一次用，之后跳过）
 
-进仓库第一件事：**探一次环境，缺什么补什么**。探测过就记着，别每个任务都重探一遍。
+第一次用，第一件事：**探一次环境，缺什么补什么**。探测过就记着，别每个任务都重探一遍。
 
 1. 探测：`./工具/py -c "import docx, pymupdf"`、`command -v soffice`、`node -v`
 2. 缺 python-docx / pymupdf → 跑一次 `./工具/py -c "import docx"`，它自建 `.venv` 并装好（约 10 秒）
@@ -152,10 +155,11 @@ PDF 是**换壳工序**：不改内容，只改形态。
 | `jiangyi/jy_builder.py` | 讲义渲染层 |
 | `jiangyi/practice_style.py` | 练习版版式层 |
 
-运行环境：macOS 或 Linux，**Python 3.x 任意版本**、Node 22+、可选 LibreOffice。
-Python 不用你挑：`scripts/py` 会把 agent 自带的（`~/.workbuddy-ai/binaries/python`、`uv`、`pyenv`）
-和系统自带的（PATH、`/opt/homebrew/bin`、`/usr/local/bin`、`/usr/bin`）都探一遍，
-**取版本最高的那个建 `.venv`**；高版本还没有预编译包时会自动退到下一个；**全都没有才提示装 Python**。
+运行环境：**macOS 或 Linux**（脚本是 bash，Windows 需 WSL），**Python 3.x 任意版本**、Node 22+、可选 LibreOffice。
+Python 不用你挑：`工具/py` 会先探宿主自带的解释器（各家 agent 把自己的 Python 放在哪儿不一样，
+常见的 `binaries/`、`uv`、`pyenv` 目录都在探测范围里），再探系统自带的
+（PATH、`/opt/homebrew/bin`、`/usr/local/bin`、`/usr/bin`），**取版本最高的那个建 `.venv`**；
+高版本还没有预编译包时会自动退到下一个；**全都没有才提示装 Python**。
 Linux 另需中文字体
 （`fonts-noto-cjk`），否则转 PDF 中文空白。镜像顺序 清华 → 阿里 → 腾讯云；**不许改全局 `pip.conf`**，不许 sudo。
 

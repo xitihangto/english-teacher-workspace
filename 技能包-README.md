@@ -6,10 +6,14 @@
 
 ## 安装
 
-把整个目录放到 `~/.workbuddy-ai/skills/gaosan-english/`（Windows：`%USERPROFILE%\.workbuddy-ai\skills\gaosan-english\`），
-保留 `references/`、`scripts/` 的相对结构。卸载就是删掉这个目录（连带 `.venv` 一起删，不会留下任何东西）。
+**纯文件，不依赖任何平台的技能格式。** 把整个目录放进宿主读得到的地方就行——宿主的技能目录、
+项目目录、甚至一个普通文件夹都可以，只要保留 `references/`、`scripts/` 的相对结构。
+宿主认 `SKILL.md` 开头的 frontmatter 就拿它做索引，不认就忽略，正文照读，行为不变。
+卸载就是删掉这个目录（连带 `.venv` 一起删，不会留下任何东西）。
 
-装完先看 `SKILL.md` 的《首次安装》：探测 `python-docx` / `pymupdf` / `soffice` / node / chromium，缺什么补什么。
+**运行环境**：macOS 或 Linux（脚本是 bash，Windows 需 WSL）；Python 3.x 任意版本；
+Node 22+（只有「一条链接取卷」那条路要用）；LibreOffice（只有 Word 转 PDF 要用，不装也能交付 docx）。
+缺什么补什么，见 `SKILL.md` 的《首次安装》。
 
 **依赖默认一个都不装。** 第一次跑 `./scripts/py ...` 时它才自建 `.venv`（本目录下，81 MB，走国内镜像，约 10 秒），
 之后一直复用；依赖坏了会自动重建。**不碰系统 Python，不用 sudo，不改全局 `pip.conf`。**
