@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """三套体系通用的成品体检。
 
-用法:
-    python3 check.py <成品.docx>              # 通用检查（字体四槽 + 空行）
-    python3 check.py <成品.docx> --kind 01    # 讲义：另查 keep/numPr/配色
-    python3 check.py <成品.docx> --kind 02    # 批改：另查红蓝字/五章节
-    python3 check.py <成品.docx> --kind 03    # 试卷：另查页边距
+用法（一律走启动器，别裸敲 python3）:
+    ./工具/py 工具/check.py <成品.docx>              # 通用检查（字体四槽 + 空行）
+    ./工具/py 工具/check.py <成品.docx> --kind 01    # 讲义：另查 keep/numPr/配色
+    ./工具/py 工具/check.py <成品.docx> --kind 02    # 批改：另查红蓝字/五章节
+    ./工具/py 工具/check.py <成品.docx> --kind 03    # 试卷：另查页边距
 
 退出码 0 = 通过，1 = 不合格。
 """
